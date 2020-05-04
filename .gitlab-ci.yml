@@ -1,0 +1,52 @@
+image: node:10.16.1
+
+cache:
+  key: '$CI_COMMIT_REF_NAME'
+  paths:
+    - node_modules/
+stages:
+  - build
+  - release
+
+before_script:
+  - export NG_CLI_ANALYTICS="false"
+
+build-dist:
+  tags:
+    - docker
+  stage: build
+  script:
+    - yarn install
+    - yarn run build
+  artifacts:
+    name: temp-server-web-$CI_COMMIT_SHORT_SHA.zip
+    paths:
+      - dist/
+    expire_in: 1 day
+
+
+docker-push:
+  image: docker:19.03.5
+  tags:
+    - docker
+  stage: release
+  variables:
+    REGISTRY_URL: registry.cn-shanghai.aliyuncs.com
+    IMAGE_NAME: $REGISTRY_URL/derhino-dev/temp-server-web
+    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  dependencies:
+    - build-dist
+  script:
+    - docker login --username=dockerPusher@derhino --password=dockerPusher% $REGISTRY_URL
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+    - docker push $IMAGE_NAME:latest
+    - docker rmi $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+    - echo $IMAGE_NAME:$IMAGE_TAG > dist/DockerImageUrl.txt
+  artifacts:
+    name: temp-server-web-$CI_COMMIT_SHORT_SHA-docker.zip
+    paths:
+      - dist/DockerImageUrl.txt
+    expire_in: 180 day
+
