@@ -1,10 +1,12 @@
 import React, { FC, useEffect, useState } from 'react';
-import {Table, Card, Input, Button, Form, Row, Col, message, Modal} from 'antd';
+import {Table, Card, Input, Button, Form, Row, Col, message, Modal, Select} from 'antd';
 import {connect, Dispatch, history} from 'umi';
 import { StateType } from '../model';
 import styles from '../style.less';
 
 const FormItem = Form.Item;
+const { Option } = Select;
+
 interface BasicListProps {
   userManagement: StateType;
   dispatch: Dispatch<any>;
@@ -38,7 +40,7 @@ export const BasicList: FC<BasicListProps> = (props) => {
   }, []);
 
   // 删除用户
-  const delUserHandle = (login: string): void => {
+  // const delUserHandle = (login: string): void => {
     // dispatch({
     //   type: 'userManagement/fetchOfDelete',
     //   payload: {
@@ -60,7 +62,7 @@ export const BasicList: FC<BasicListProps> = (props) => {
     //     });
     //   }
     // });
-  }
+  // }
 
   // 关闭详情
   const hideDetailInfo = (): void => {
@@ -79,14 +81,20 @@ export const BasicList: FC<BasicListProps> = (props) => {
   }
 
   // 修改
-  const editHandle = (login: string): void => {
+  const editHandle = (id: number): void => {
     history.push({
       pathname: '/userManagement/add',
       query: {
-        login
+        id
       },
     });
 
+  }
+
+  const departmentList = {
+    "1": "技术部",
+    "2": "工服部-数据中心",
+    "3": "工服部-运维部"
   }
 
   const columns: any[] = [{
@@ -97,6 +105,9 @@ export const BasicList: FC<BasicListProps> = (props) => {
     title: '部门',
     dataIndex: 'department',
     align: 'center',
+    render: (value: string) => (
+      <div>{departmentList[value]}</div>
+    )
   }, {
     title: '工号',
     dataIndex: 'workNumber',
@@ -116,8 +127,8 @@ export const BasicList: FC<BasicListProps> = (props) => {
     render: (value: number, record: any): any => (
       <div className={styles.user_operation}>
         <a onClick={() => detailHandle(record)}>详情</a>
-        <a onClick={() => editHandle(record.login)}>修改</a>
-        <a onClick={() => delUserHandle(record.login)}>删除</a>
+        <a onClick={() => editHandle(record.id)}>修改</a>
+        {/*<a onClick={() => delUserHandle(record.login)}>删除</a>*/}
       </div>
     )
   }];
@@ -177,13 +188,21 @@ export const BasicList: FC<BasicListProps> = (props) => {
                 label="部门"
                 name="department"
               >
-                <Input placeholder="部门" />
+                <Select
+                  placeholder="部门"
+                  allowClear
+                  className={styles.department_select}
+                >
+                  <Option value="1">技术部</Option>
+                  <Option value="2">工服部-数据中心</Option>
+                  <Option value="3">工服部-运维部</Option>
+                </Select>
               </FormItem>
               <FormItem
                 label="姓名"
                 name="realName"
               >
-                <Input placeholder="姓名" />
+                <Input placeholder="姓名" allowClear />
               </FormItem>
             </Form>
           </Col>
@@ -215,19 +234,18 @@ export const BasicList: FC<BasicListProps> = (props) => {
         </Row>
         <Row>
           <Col span={12}>姓名：{detail.realName}</Col>
-          <Col span={12}>部门：{detail.department}</Col>
+          <Col span={12}>部门：{departmentList[detail.department]}</Col>
         </Row>
         <Row>
           <Col span={12}>工号：{detail.workNumber}</Col>
-          <Col span={12}>手机号：{detail.department}</Col>
+          <Col span={12}>手机号：{detail.mobilePhone}</Col>
         </Row>
         <Row>
-          <Col span={12}>姓名：{detail.realName}</Col>
-          <Col span={12}>部门：{detail.department}</Col>
+          <Col span={12}>电话：{detail.telephone}</Col>
+          <Col span={12}>邮箱：{detail.email}</Col>
         </Row>
         <Row>
-          <Col span={12}>姓名：{detail.realName}</Col>
-          <Col span={12}>部门：{detail.department}</Col>
+          <Col span={12}>登录名：{detail.login}</Col>
         </Row>
       </Modal>
     </div>

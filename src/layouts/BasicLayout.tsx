@@ -105,7 +105,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     // }
 
     // 路由拦截
-    if (!getCSRF()) {
+    const authority = localStorage.getItem('authority');
+    if (!authority) {
       history.replace('/user/login')
     }
 

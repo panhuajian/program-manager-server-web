@@ -6,7 +6,7 @@ export function getPageQuery() {
 
 export function setAuthority(authority: string | string[]) {
   const proAuthority = typeof authority === 'string' ? [authority] : authority;
-  localStorage.setItem('antd-pro-authority', JSON.stringify(proAuthority));
+  localStorage.setItem('authority', JSON.stringify(proAuthority));
   // hard code
   // reload Authorized component
   try {

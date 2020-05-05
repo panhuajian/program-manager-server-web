@@ -86,7 +86,7 @@ export default defineConfig({
   },
   proxy: {
     '/api/': {
-      target: 'http://ifqvh5.natappfree.cc/',
+      target: 'http://5e8dsg.natappfree.cc/',
       changeOrigin: true,
     },
   },

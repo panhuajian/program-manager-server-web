@@ -89,6 +89,25 @@ export const routes = [
             }]
           },
           {
+            path: '/version',
+            icon: 'snippets',
+            name: 'version',
+            // component: './userManagement',
+            // authority: ['admin3'],
+            routes: [{
+              name: 'versionList',
+              icon: 'unordered-list',
+              path: '/version/list',
+              component: './version/list',
+            }, {
+              name: 'versionAdd',
+              icon: 'smile',
+              path: '/version/add',
+              component: './version/add',
+              hideInMenu: true,
+            }]
+          },
+          {
             path: '/',
             // redirect: '/dashboard/analysis',
             redirect: '/listbasiclist',

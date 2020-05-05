@@ -34,43 +34,47 @@ const Model: ModelType = {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const { data, response } = yield call(fetOfPost, payload);
+      const result  = yield call(fetOfPost, payload);
+      const { data, response } = result;
       yield put({
         type: 'setNewState',
         key: 'status',
         data: response.status,
-        currentAuthority: data.response,
       });
       yield put({
         type: 'setNewState',
         key: 'type',
         data: data.type,
-        currentAuthority: data.response,
       });
       // Login successfully
-      if (response.status === 200) {
-        message.success('登录成功！');
-        const urlParams = new URL(window.location.href);
-        const params = getPageQuery();
-        let { redirect } = params as { redirect: string };
-        if (redirect) {
-          const redirectUrlParams = new URL(redirect);
-          if (redirectUrlParams.origin === urlParams.origin) {
-            redirect = redirect.substr(urlParams.origin.length);
-            if (redirect.match(/^\/.*#/)) {
-              redirect = redirect.substr(redirect.indexOf('#') + 1);
-            }
-          } else {
-            window.location.href = redirect;
-            return;
-          }
-        }
+      // if (response.status === 200) {
+        // const urlParams = new URL(window.location.href);
+        // const params = getPageQuery();
+        // let { redirect } = params as { redirect: string };
+        // if (redirect) {
+        //   const redirectUrlParams = new URL(redirect);
+        //   if (redirectUrlParams.origin === urlParams.origin) {
+        //     redirect = redirect.substr(urlParams.origin.length);
+        //     if (redirect.match(/^\/.*#/)) {
+        //       redirect = redirect.substr(redirect.indexOf('#') + 1);
+        //     }
+        //   } else {
+        //     window.location.href = redirect;
+        //     return;
+        //   }
+        // }
         // localStorage.setItem('token', data.id_token);
-        history.replace(redirect || '/');
-      }
+      // }
+      return result;
     },
-    *fetchOfGet({ payload }, { call }) {
-      yield call(fetchOfGet, payload);
+    *fetchOfGet({ payload }, { call, put }) {
+      const result = yield call(fetchOfGet, payload);
+      const { data, response } = result;
+      if (payload.key === 'authorities') {
+        if (response.status >= 200 && response.status < 300) {
+          setAuthority(data.authorities);
+        }
+      }
     },
     *getCaptcha({ payload }, { call }) {
       yield call(getFakeCaptcha, payload);
@@ -78,8 +82,7 @@ const Model: ModelType = {
   },
 
   reducers: {
-    setNewState(state, { key, data, currentAuthority } ) {
-      setAuthority(currentAuthority);
+    setNewState(state, { key, data } ) {
       return {
         ...state,
         [key]: data,

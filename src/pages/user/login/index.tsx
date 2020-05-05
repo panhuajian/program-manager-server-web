@@ -1,6 +1,6 @@
-import { Alert, Checkbox } from 'antd';
+import {Alert, Checkbox, message} from 'antd';
 import React, { useState, useEffect } from 'react';
-import {Dispatch, AnyAction, Link, connect, FormattedMessage, formatMessage} from 'umi';
+import {Dispatch, AnyAction, Link, connect, history} from 'umi';
 import { StateType } from './model';
 import styles from './style.less';
 import LoginFrom from './components/Login';
@@ -60,6 +60,18 @@ const Login: React.FC<LoginProps> = (props) => {
         url: '/api/authentication',
         body: formData
       },
+    }).then(({ response }: any) => {
+      if (response.status === 200) {
+        dispatch({
+          type: 'userAndlogin/fetchOfGet',
+          payload: {
+            url: '/api/account',
+            key: 'authorities'
+          },
+        })
+        message.success('登录成功！');
+        history.replace('/');
+      }
     });
     localStorage.setItem('username', values.username);
   };

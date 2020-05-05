@@ -68,7 +68,8 @@ const Model: LoginModelType = {
             redirect: window.location.href,
           }),
         });
-        setCookie('XSRF-TOKEN', '', -1)
+        setCookie('XSRF-TOKEN', '', -1);
+        localStorage.removeItem('auauthority')
       }
     },
   },

@@ -14,13 +14,13 @@ interface BasicFormProps {
   userInfo: {};
   location: {
     query: {
-      login?: string
+      id?: number
     }
   }
 }
 
 const BasicForm: FC<BasicFormProps> = (props) => {
-  const { submitting, dispatch, location: { query: { login } }, userManagement: { userInfo } } = props;
+  const { submitting, dispatch, location: { query: { id } }, userManagement: { userInfo } } = props;
   const [form] = Form.useForm();
   const formItemLayout = {
     labelCol: {
@@ -42,11 +42,11 @@ const BasicForm: FC<BasicFormProps> = (props) => {
   };
 
   useEffect(() => {
-    if (login) {
+    if (id) {
       dispatch({
         type: 'userManagement/fetchOfGet',
         payload: {
-          url: `api/users/${login}`,
+          url: `api/users/id/${id}`,
           key: 'userInfo'
         },
       })
@@ -67,12 +67,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
 
   const handleSubmit = (): void => {
     form.validateFields().then(values => {
-      // const formData = new FormData();
-      // Object.keys(values).forEach(item => {
-      //   formData.append(item, values[item])
-      // });
-      // console.log(formData)
-      if (login) {
+      if (id) {
         dispatch({
           type: 'userManagement/fetchOfPut',
           payload: {
@@ -136,24 +131,24 @@ const BasicForm: FC<BasicFormProps> = (props) => {
           }]}
         >
           <Select placeholder="请选择部门">
-            <Option value="1">部门1</Option>
-            <Option value="2">部门2</Option>
-            <Option value="3">部门3</Option>
+            <Option value="1">技术部</Option>
+            <Option value="2">工服部-数据中心</Option>
+            <Option value="3">工服部-运维部</Option>
           </Select>
         </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="权限"
-          name="authorities"
-          rules={[{
-            required: true,
-            message: "请选择权限",
-          }]}
-        >
-          <Select placeholder="请选择权限" mode="multiple">
-            <Option value="ROLE_ADMIN">超级管理员</Option>
-          </Select>
-        </FormItem>
+        {/*<FormItem*/}
+        {/*  {...formItemLayout}*/}
+        {/*  label="权限"*/}
+        {/*  name="authorities"*/}
+        {/*  rules={[{*/}
+        {/*    required: true,*/}
+        {/*    message: "请选择权限",*/}
+        {/*  }]}*/}
+        {/*>*/}
+        {/*  <Select placeholder="请选择权限" mode="multiple">*/}
+        {/*    <Option value="ROLE_ADMIN">超级管理员</Option>*/}
+        {/*  </Select>*/}
+        {/*</FormItem>*/}
         <FormItem
           {...formItemLayout}
           label="姓名"

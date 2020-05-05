@@ -19,6 +19,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
   const [form] = Form.useForm();
   const [current, setCurrent] = useState<number>(0);
   const [fileData, setFileData] = useState();
+  const [reFreshRenderArr, setReFreshRenderArr] = useState([0]);
   const formItemLayout = {
     labelCol: {
       xs: { span: 24 },
@@ -39,42 +40,42 @@ const BasicForm: FC<BasicFormProps> = (props) => {
   };
 
   const handleSubmit = (): void => {
-    // setCurrent(current + 1)
-    form.validateFields().then(values => {
-      const formData = new FormData();
-      switch(current) {
-        case 0:
-          // Object.keys(values).forEach(item => {
-          //   if (item === 'photo') {
-          //     formData.append(item, values[item][0].originFileObj)
-          //   } else if (item === 'appointmentTime') {
-          //     formData.append(item, moment(values[item]).format())
-          //   } else {
-          //     formData.append(item, values[item])
-          //   }
-          // });
-          // console.log(formData)
-          dispatch({
-            type: 'userManagement/fetchOfPost',
-            payload: {
-              url: '/mock/api/user-infos',
-              body: {
-                ...values,
-                upload: undefined,
-              },
-            },
-          }).then(({ response }): void => {
-            if (response.status <= 300 && response.status >= 200) {
-              setCurrent(current + 1)
-            }
-          })
-          break;
-        default:
-      }
-
-    }).catch(errorInfo => {
-      console.log(errorInfo)
-    })
+    setCurrent(current + 1)
+    // form.validateFields().then(values => {
+    //   const formData = new FormData();
+    //   switch(current) {
+    //     case 0:
+    //       // Object.keys(values).forEach(item => {
+    //       //   if (item === 'photo') {
+    //       //     formData.append(item, values[item][0].originFileObj)
+    //       //   } else if (item === 'appointmentTime') {
+    //       //     formData.append(item, moment(values[item]).format())
+    //       //   } else {
+    //       //     formData.append(item, values[item])
+    //       //   }
+    //       // });
+    //       // console.log(formData)
+    //       dispatch({
+    //         type: 'userManagement/fetchOfPost',
+    //         payload: {
+    //           url: '/mock/api/user-infos',
+    //           body: {
+    //             ...values,
+    //             upload: undefined,
+    //           },
+    //         },
+    //       }).then(({ response }): void => {
+    //         if (response.status <= 300 && response.status >= 200) {
+    //           setCurrent(current + 1)
+    //         }
+    //       })
+    //       break;
+    //     default:
+    //   }
+    //
+    // }).catch(errorInfo => {
+    //   console.log(errorInfo)
+    // })
   }
 
   const statusValue = (step: number): string => {
@@ -108,14 +109,103 @@ const BasicForm: FC<BasicFormProps> = (props) => {
 
   // 文件上传状态修改
   const uploadChangeHandle = (file: any): void => {
-    setFileData(file)
+    if (file.fileList.length > 0) {
+      setFileData(file.file)
+    } else {
+      setFileData(undefined)
+    }
   }
 
   // 上传烧包卡
-  const uploadHandle = (): void => {
+  const uploadHandle = async (): void => {
     if (!fileData) {
       message.error('请先选择文件')
+    } else {
+      const result = await dispatch({
+        type: 'userManagement/fetchOfGet',
+        payload: {
+          url: '/api/upload?',
+          body: {
+            originFilename: fileData.name,
+            resourceType: 'shaokabao'
+          },
+          key: 'uploadData'
+        },
+      })
+      console.log(result)
     }
+  }
+
+  // 删除刷新模块
+  const deleteHandle = (index: number): void => {
+    if (reFreshRenderArr.length === 1) {
+      return undefined;
+    }
+    const newArr = [...reFreshRenderArr];
+    newArr.splice(index, 1);
+    setReFreshRenderArr(newArr)
+  }
+
+  // 渲染现场刷新模块
+  const refreshRender = () => {
+    return reFreshRenderArr.map((item, index) => (
+      <Card
+        title={`模块${index+ 1}`}
+        className={styles.refresh_card}
+        extra={<a onClick={deleteHandle}>删除</a>}
+      >
+        <FormItem
+          {...formItemLayout}
+          label="刷新日期"
+          name={`refresh[${item}].time`}
+          rules={[{
+            required: true,
+            message: "请选择刷新日期",
+          }]}
+        >
+          <DatePicker placeholder="请选择刷新日期"/>
+        </FormItem>
+        <FormItem
+          {...formItemLayout}
+          label="现场实际运行版本"
+          name={`refresh[${item}].version`}
+          rules={[{
+            required: true,
+            message: "请输入现场实际运行版本",
+          }]}
+        >
+          <Input placeholder="请输入现场实际运行版本"/>
+        </FormItem>
+        <FormItem
+          {...formItemLayout}
+          label="风机号"
+          name={`refresh[${item}].number`}
+          rules={[{
+            required: true,
+            message: "请输入风机号",
+          }]}
+        >
+          <Input placeholder="请输入风机号"/>
+        </FormItem>
+        < FormItem
+          {...formItemLayout}
+          label="特殊配置"
+          name={`refresh[${item}].configuration`}
+          rules={[{
+            required: true,
+            message: "请输入特殊配置",
+          }]}
+        >
+          <TextArea rows={4} placeholder="请输入特殊配置"/>
+        </FormItem>
+      </Card>
+    ))
+  }
+
+  // 刷新页面添加按钮
+  const addHandle = (): void => {
+    const newArr = [...reFreshRenderArr, reFreshRenderArr[reFreshRenderArr.length - 1] + 1];
+    setReFreshRenderArr(newArr)
   }
 
   return (
@@ -138,6 +228,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
           name="basic"
           initialValues={{public: '1'}}
         >
+          {/*程序发布*/}
           {current === 0 &&
             <>
               <FormItem
@@ -257,6 +348,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
                 </FormItem>
             </>
           }
+          {/*指派现场*/}
           {current === 1 &&
             <>
               <FormItem
@@ -283,54 +375,18 @@ const BasicForm: FC<BasicFormProps> = (props) => {
               </FormItem>
             </>
           }
+          {/*现场刷新*/}
           {current === 2 &&
             <>
-              <FormItem
-                {...formItemLayout}
-                label="刷新日期"
-                name="department"
-                rules={[{
-                  required: true,
-                  message: "请选择刷新日期",
-                }]}
-              >
-                <DatePicker placeholder="请选择刷新日期"/>
-              </FormItem>
-              <FormItem
-                {...formItemLayout}
-                label="现场实际运行版本"
-                name="department"
-                rules={[{
-                  required: true,
-                  message: "请输入现场实际运行版本",
-                }]}
-              >
-                <Input placeholder="请输入现场实际运行版本"/>
-              </FormItem>
-              <FormItem
-                {...formItemLayout}
-                label="风机号"
-                name="department"
-                rules={[{
-                  required: true,
-                  message: "请输入风机号",
-                }]}
-              >
-                <Input placeholder="请输入风机号"/>
-              </FormItem>
-              < FormItem
-                {...formItemLayout}
-                label="特殊配置"
-                name="name"
-                rules={[{
-                  required: true,
-                  message: "请输入特殊配置",
-                }]}
-              >
-                <TextArea rows={4} placeholder="请输入特殊配置"/>
-              </FormItem>
+              {refreshRender()}
+              <Button
+                type="primary"
+                className={styles.margin_top_20}
+                onClick={addHandle}
+              >添加</Button>
             </>
           }
+          {/*运行反馈*/}
           {current === 3 &&
             <>
               < FormItem
@@ -346,6 +402,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
               </FormItem>
             </>
           }
+          {/*结果分析*/}
           {current === 4 &&
             <>
               < FormItem
@@ -361,6 +418,7 @@ const BasicForm: FC<BasicFormProps> = (props) => {
               </FormItem>
             </>
           }
+          {/*任务完成*/}
           {current === 5 &&
             <Result
               status="success"
@@ -373,7 +431,8 @@ const BasicForm: FC<BasicFormProps> = (props) => {
           {current !== 5 &&
             <FormItem {...submitFormLayout} style={{marginTop: 32}}>
               <Button
-                type="primary" loading={submitting}
+                type="primary"
+                loading={submitting}
                 onClick={handleSubmit}
                 className={styles.margin_right_20}
               >
